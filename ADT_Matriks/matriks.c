@@ -98,12 +98,9 @@ void TulisMATRIKS (MATRIKS M)
     for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
         for (int j = GetFirstIdxKol(M); j <= GetLastIdxKol(M); j++) {
             printf("%d", Elmt(M, i, j));
-            if (i != GetLastIdxBrs(M) && j == GetLastIdxKol(M)) {
-                printf("\n");
-            } else if (i != GetLastIdxBrs(M) && j != GetLastIdxKol(M)){
-                printf(" ");
-            }
+            if (j < GetLastIdxKol(M)) printf(" ");
         }
+        if (i != GetLastIdxBrs(M)) printf("\n");
     }
 }
 /* ********** KELOMPOK OPERASI ARITMATIKA TERHADAP TYPE ********** */
@@ -300,6 +297,7 @@ float Determinan (MATRIKS M)
     for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
         float temp = MF[i][i];
         hasil *= temp;
+        if (hasil == 0) return hasil;
         for (int k = GetFirstIdxKol(M); k <= GetLastIdxKol(M); k++) MF[i][k] /= temp;
         for (int j = i + 1; j <= GetLastIdxBrs(M); j++) {
             temp = MF[j][i];
