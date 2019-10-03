@@ -1,5 +1,5 @@
 // Muhammad Hasan - 13518012
-// Tanggal  : 15/09/2019
+// Tanggal  : 25 / 09 / 2019
 
 #include <stdio.h>
 #include "matriks.h"
@@ -281,8 +281,8 @@ float Determinan (MATRIKS M)
     for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
         if (MF[i][i] == 0) {
             boolean tukar = false;
-            for (int j = i + 1; j <= GetLastIdxBrs(M); j++) {
-                if (MF[j][j] != 0) {
+            for (int j = 1; j <= GetLastIdxBrs(M); j++) {
+                if (MF[j][i] != 0) {
                     for (int k = GetFirstIdxKol(M); k <= GetLastIdxKol(M); k++) MF[0][k] = MF[i][k];
                     for (int k = GetFirstIdxKol(M); k <= GetLastIdxKol(M); k++) MF[i][k] = MF[j][k];
                     for (int k = GetFirstIdxKol(M); k <= GetLastIdxKol(M); k++) MF[j][k] = MF[0][k];
@@ -291,13 +291,13 @@ float Determinan (MATRIKS M)
                     break;
                 }
             }
-            if (!tukar) return 0;
+            if (!tukar) return 0.00000;
         }
     }
     for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
         float temp = MF[i][i];
         hasil *= temp;
-        if (hasil == 0) return hasil;
+        if (hasil == 0.000) return 0.00000;
         for (int k = GetFirstIdxKol(M); k <= GetLastIdxKol(M); k++) MF[i][k] /= temp;
         for (int j = i + 1; j <= GetLastIdxBrs(M); j++) {
             temp = MF[j][i];
@@ -325,4 +325,86 @@ void Transpose (MATRIKS * M)
             Elmt(*M, i, j) = Elmt(ret, j, i);
         }
     }
+}
+
+float RataBrs (MATRIKS M, indeks i)
+/* Menghasilkan rata-rata dari elemen pada baris ke-i */
+/* Prekondisi: i adalah indeks baris efektif dari M */
+{
+    float ret = 0;
+    float div = GetLastIdxKol(M) - GetFirstIdxKol(M) + 1;
+    for (int j = GetFirstIdxKol(M); j <= GetLastIdxKol(M); j++) {
+        ret += Elmt(M, i, j);
+    }
+    ret /= div;
+    return ret;
+
+}
+float RataKol (MATRIKS M, indeks j)
+/* Menghasilkan rata-rata dari elemen pada kolom ke-j */
+/* Prekondisi: j adalah indeks kolom efektif dari M */
+{
+    float ret = 0;
+    float div = GetLastIdxBrs(M) - GetFirstIdxBrs(M) + 1;
+    for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
+        ret += Elmt(M, i, j);
+    }
+    ret /= div;
+    return ret;
+
+}
+void MaxMinBrs (MATRIKS M, indeks i, ElType * max, ElType * min)
+/* I.S. i adalah indeks baris efektif dari M, M terdefinisi */
+/* F.S. max berisi elemen maksimum pada baris i dari M
+           min berisi elemen minimum pada baris i dari M */
+{
+    *max = -999999;
+    *min = 999999;
+    for (int j = GetFirstIdxKol(M); j <= GetLastIdxKol(M); j++) {
+        ElType cur = Elmt(M, i, j);
+        if (cur > *max) {
+            *max = cur;
+        }
+        if (cur < *min) {
+            *min = cur;
+        }
+    }
+}
+
+void MaxMinKol (MATRIKS M, indeks j, ElType * max, ElType * min)
+/* I.S. j adalah indeks kolom efektif dari M, M terdefinisi */
+/* F.S. max berisi elemen maksimum pada kolom j dari M
+           min berisi elemen minimum pada kolom j dari M */
+{
+    *max = -999999;
+    *min = 999999;
+    for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
+        ElType cur = Elmt(M, i, j);
+        if (cur > *max) {
+            *max = cur;
+        }
+        if (cur < *min) {
+            *min = cur;
+        }
+    }
+}
+int CountXBrs (MATRIKS M, indeks i, ElType X)
+/* Menghasilkan banyaknya kemunculan X pada baris i dari M */
+{
+    int ret = 0;
+    for (int j = GetFirstIdxKol(M); j <= GetLastIdxKol(M); j++) {
+        ElType cur = Elmt(M, i, j);
+        if (cur == X) ret++;
+    }
+    return ret;
+}
+int CountXKol (MATRIKS M, indeks j, ElType X)
+/* Menghasilkan banyaknya kemunculan X pada kolom j dari M */
+{
+    int ret = 0;
+    for (int i = GetFirstIdxBrs(M); i <= GetLastIdxBrs(M); i++) {
+        ElType cur = Elmt(M, i, j);
+        if (cur == X) ret++;
+    }
+    return ret;
 }

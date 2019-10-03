@@ -12,7 +12,11 @@ void MakeEmpty(TabInt *T, int maxel)
 /* F.S. Terbentuk tabel T kosong dengan kapasitas maxel + 1 */
 /* Proses: Inisialisasi semua elemen tabel T dengan ValUndef */
 {
-  TI(*T) = (int*) malloc((1000) * sizeof(int));
+  TI(*T) = (ElType*) malloc((maxel + 1) * sizeof(ElType));
+  if (TI(*T) == NULL) {
+      printf("Alokasi memori gagal.\n");
+      return;
+  }
   MaxEl(*T) = maxel;
   for (int i = IdxMin; i <= MaxEl(*T); i++) {
     Elmt(*T, i) = ValUndef;
@@ -34,7 +38,7 @@ int NbElmt(TabInt T)
   int pos = 0;
   for (int i = IdxMin; i <= MaxEl(T); i++) {
     if (Elmt(T, i) == ValUndef) break;
-    pos = i;
+    pos++;
   }
   return pos;
 }
@@ -55,14 +59,14 @@ IdxType GetLastIdx(TabInt T)
 /* Prekondisi : Tabel T tidak kosong */
 /* Mengirimkan indeks elemen T terakhir */
 {
-  return NbElmt(T);
+  return (IdxMin + NbElmt(T) - 1);
 }
 /* ********** Test Indeks yang valid ********** */
 boolean IsIdxValid(TabInt T, IdxType i)
 /* Mengirimkan true jika i adalah indeks yang valid utk ukuran tabel */
 /* yaitu antara indeks yang terdefinisi utk container*/
 {
-  return (IdxMin <= i && i <= MaxElement(T));
+  return ((IdxMin <= i) && (i <= MaxElement(T)));
 }
 boolean IsIdxEff(TabInt T, IdxType i)
 /* Mengirimkan true jika i adalah indeks yang terdefinisi utk tabel */
@@ -100,8 +104,8 @@ void BacaIsi(TabInt *T)
   do {
     scanf("%d", &n);
   } while (n < 0 || n > MaxElement(*T));
-  MakeEmpty(T, n);
-  for (int i = IdxMin; i <= IdxMin + n - 1; i++) {
+  for (int i = GetFirstIdx(*T); i <= MaxElement(*T); i++) Elmt(*T, i) = ValUndef;
+  for (int i = GetFirstIdx(*T); i <= n; i++) {
     scanf("%d", &Elmt(*T, i));
   }
 }
@@ -130,10 +134,10 @@ TabInt PlusMinusTab(TabInt T1, TabInt T2, boolean plus)
 /* Jika plus = true, mengirimkan  T1+T2, yaitu setiap elemen T1 dan T2 pada indeks yang sama dijumlahkan */
 /* Jika plus = false, mengirimkan T1-T2, yaitu setiap elemen T1 dikurangi elemen T2 pada indeks yang sama */
 {
-  int kali = (plus ? 1 : - 1);
+  ElType kali = (plus ? 1 : - 1);
   TabInt hasil;
   MakeEmpty(&hasil, MaxEl(T1));
-  for (int i = IdxMin; i <= NbElmt(hasil); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(hasil); i++) {
     Elmt(hasil, i) = Elmt(T1, i) + Elmt(T2, i) * kali;
   }
   return hasil;
@@ -144,7 +148,7 @@ boolean IsEQ(TabInt T1, TabInt T2)
 /* Mengirimkan true jika T1 sama dengan T2 yaitu jika Neff T1 = T2 dan semua elemennya sama */
 {
   if (NbElmt(T1) != NbElmt(T2)) return false;
-  for (int i = IdxMin; i <= NbElmt(T1); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(T1); i++) {
     if (Elmt(T1, i) != Elmt(T2, i)) return false;
   }
   return true;
@@ -159,7 +163,7 @@ IdxType Search1(TabInt T, ElType X)
 /* Skema Searching yang digunakan bebas */
 {
   if (NbElmt(T) == 0) return IdxUndef;
-  for (int i = IdxMin; i <= NbElmt(T); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(T); i++) {
     if (Elmt(T, i) == X) return i;
   }
   return IdxUndef;
@@ -169,7 +173,7 @@ boolean SearchB(TabInt T, ElType X)
 /* Jika ada, menghasilkan true, jika tidak ada menghasilkan false */
 /* Skema searching yang digunakan bebas */
 {
-  for (int i = IdxMin; i <= NbElmt(T); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(T); i++) {
     if (Elmt(T, i) == X) return true;
   }
   return false;
@@ -181,8 +185,9 @@ void MaxMin(TabInt T, ElType *Max, ElType *Min)
         Min berisi nilai minimum T */
 {
   int maks, mins;
-  maks = mins = Elmt(T, IdxMin);
-  for (int i = IdxMin; i <= NbElmt(T); i++) {
+  maks = Elmt(T, IdxMin);
+  mins = Elmt(T, IdxMin);
+  for (int i = IdxMin; i <= GetLastIdx(T); i++) {
     if (Elmt(T, i) > maks) maks = Elmt(T, i);
     if (Elmt(T, i) < mins) mins = Elmt(T, i);
   }
@@ -196,7 +201,7 @@ void CopyTab(TabInt Tin, TabInt *Tout)
 /* Proses : Menyalin isi Tin ke Tout */
 {
   MakeEmpty(Tout, MaxEl(Tin));
-  for (int i = IdxMin; i <= NbElmt(Tin); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(Tin); i++) {
     Elmt(*Tout, i) = Elmt(Tin, i);
   }
 }
@@ -205,7 +210,7 @@ ElType SumTab(TabInt T)
 /* Jika T kosong menghasilkan 0 */
 {
   ElType sum = 0;
-  for (int i = IdxMin; i <= NbElmt(T); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(T); i++) {
     sum += Elmt(T, i);
   }
   return sum;
@@ -215,7 +220,7 @@ int CountX(TabInt T, ElType X)
 /* Jika T kosong menghasilkan 0 */
 {
   int ret = 0;
-  for (int i = IdxMin; i <= NbElmt(T); i++) {
+  for (int i = IdxMin; i <= GetLastIdx(T); i++) {
     if (Elmt(T, i) == X) ret++;
   }
   return ret;
@@ -224,7 +229,7 @@ boolean IsAllGenap(TabInt T)
 /* Menghailkan true jika semua elemen T genap. T boleh kosong */
 {
   if (IsEmpty(T)) return false;
-  for (int i = IdxMin; i <= NbElmt(T); i++) {
+  for (int i = GetFirstIdx(T); i <= GetLastIdx(T); i++) {
     if (Elmt(T, i) % 2 == 1) return false;
   }
   return true;
@@ -237,16 +242,47 @@ void Sort(TabInt *T, boolean asc)
 /* Proses : Mengurutkan T dengan salah satu algoritma sorting,
    algoritma bebas */
 {
-  int n = NbElmt(*T);
-  for (int i = IdxMin; i <= n; i++) {
-    for (int j = IdxMin; j <= n - 1; j++) {
-      if ((!asc && TI(*T)[j] < TI(*T)[j + 1]) || (asc && TI(*T)[j] > TI(*T)[j + 1])) {
-        ElType temp = TI(*T)[j];
-        TI(*T)[j] = TI(*T)[j + 1];
-        TI(*T)[j + 1] = temp;
+    // Kamus
+    IdxType pass, idx;
+    ElType temp;
+    boolean tukar;
+    // Algoritma
+    // Bubble sort optimized
+    if (asc) {
+      if (NbElmt(*T) > 1) {
+        pass = GetFirstIdx(*T);
+        tukar = true; // masih ada pertukaran
+        while ((pass <= (GetLastIdx(*T) - 1)) && (tukar)) {
+          tukar = false;
+          for (idx = GetLastIdx(*T); idx >= (pass + 1); idx--) {
+            if (Elmt(*T, idx) < Elmt(*T, idx - 1)) {
+              temp = Elmt(*T, idx);
+              Elmt(*T, idx) = Elmt(*T, idx - 1);
+              Elmt(*T, idx - 1) = temp;
+              tukar = true;
+            }
+          }
+          pass += 1;
+        }
+      }
+    } else { // !asc
+      if (NbElmt(*T) > 1) {
+        pass = GetFirstIdx(*T);
+        tukar = true; // masih ada pertukaran
+        while ((pass <= (GetLastIdx(*T) - 1)) && (tukar)) {
+          tukar = false;
+          for (idx = GetLastIdx(*T); idx >= (pass + 1); idx--) {
+            if (Elmt(*T, idx) > Elmt(*T, idx - 1)) {
+              temp = Elmt(*T, idx);
+              Elmt(*T, idx) = Elmt(*T, idx - 1);
+              Elmt(*T, idx - 1) = temp;
+              tukar = true;
+            }
+          }
+          pass += 1;
+        }
       }
     }
-  }
 }
 /* ********** MENAMBAH DAN MENGHAPUS ELEMEN DI AKHIR ********** */
 /* *** Menambahkan elemen terakhir *** */
@@ -255,8 +291,7 @@ void AddAsLastEl(TabInt *T, ElType X)
 /* I.S. Tabel T boleh kosong, tetapi tidak penuh */
 /* F.S. X adalah elemen terakhir T yang baru */
 {
-  int pos = NbElmt(*T);
-  Elmt(*T, pos + 1) = X;
+  Elmt(*T, GetLastIdx(*T) + 1) = X;
 }
 /* ********** MENGHAPUS ELEMEN ********** */
 void DelLastEl(TabInt *T, ElType *X)
@@ -266,9 +301,8 @@ void DelLastEl(TabInt *T, ElType *X)
 /*      Banyaknya elemen tabel berkurang satu */
 /*      Tabel T mungkin menjadi kosong */
 {
-  int pos = NbElmt(*T);
-  *X = Elmt(*T, pos);
-  Elmt(*T, pos) = ValUndef;
+  *X = Elmt(*T, GetLastIdx(*T));
+  Elmt(*T, GetLastIdx(*T)) = ValUndef;
 }
 /* ********* MENGUBAH UKURAN ARRAY ********* */
 void GrowTab(TabInt *T, int num)
@@ -276,22 +310,38 @@ void GrowTab(TabInt *T, int num)
 /* I.S. Tabel sudah terdefinisi */
 /* F.S. Ukuran tabel bertambah sebanyak num */
 {
-  TI(*T) = (ElType* ) realloc(TI(*T), (MaxElement(*T) + 1) * sizeof(ElType));
+  TI(*T) = (ElType* ) realloc(TI(*T), (MaxElement(*T) + num + 1) * sizeof(ElType));
+  if (TI(*T) == NULL) {
+      printf("Alokasi memori gagal.\n");
+      return;
+  }
   MaxEl(*T) += num;
+  for (int i = MaxEl(*T) - num + 1; i <= MaxEl(*T); i++) Elmt(*T, i) = ValUndef;
 }
 void ShrinkTab(TabInt *T, int num)
 /* Proses : Mengurangi max element sebanyak num */
 /* I.S. Tabel sudah terdefinisi, ukuran MaxEl > num, dan Neff < MaxEl - num. */
 /* F.S. Ukuran tabel berkurang sebanyak num. */
 {
+  int temp;
+  TI(*T) = (ElType* ) realloc(TI(*T), (MaxEl(*T) - num + 1) * sizeof(ElType));
+  if (TI(*T) == NULL) {
+      printf("Alokasi memori gagal.\n");
+      return;
+  }
   MaxEl(*T) -= num;
-  while (NbElmt(*T) > MaxEl(*T)) DelLastEl(T, &num);
+  while (NbElmt(*T) > MaxEl(*T)) DelLastEl(T, &temp);
 }
 void CompactTab(TabInt *T)
 /* Proses : Mengurangi max element sehingga Neff = MaxEl */
 /* I.S. Tabel tidak kosong */
 /* F.S. Ukuran MaxEl = Neff */
 {
-  TI(*T) = (ElType* ) realloc(TI(*T), (NbElmt(*T) + 1) * sizeof(ElType));
-  MaxEl(*T) = NbElmt(*T);
+  int neff = NbElmt(*T);
+  TI(*T) = (ElType* ) realloc(TI(*T), (neff) * sizeof(ElType));
+  if (TI(*T) == NULL) {
+      printf("Alokasi memori gagal.\n");
+      return;
+  }
+  MaxEl(*T) = neff;
 }
