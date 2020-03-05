@@ -1,6 +1,6 @@
 // Nama/NIM		: Muhammad Hasan/13518012
 // Tanggal 		: 5 September 2019
-// Deskripsi	: Menentukan Monotiknya suatu array
+// Deskripsi		: Menentukan Monotiknya suatu array
 
 #include <stdio.h>
 #include "array.h"
